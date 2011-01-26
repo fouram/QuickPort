@@ -1,0 +1,3 @@
+name: QuickPort
+main: com.bukkit.fouram.QuickPort.QuickPort
+version: 0.0.1
