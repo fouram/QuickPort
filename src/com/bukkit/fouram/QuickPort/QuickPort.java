@@ -11,6 +11,9 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.PluginManager;
+import com.nijikokun.bukkit.Permissions.Permissions;
+import com.nijiko.permissions.PermissionHandler;
+import org.bukkit.plugin.Plugin;
 
 /**
  * QuickPort for Bukkit
@@ -22,6 +25,15 @@ public class QuickPort extends JavaPlugin {
     private final QuickPortBlockListener blockListener = new QuickPortBlockListener(this);
     private final HashMap<Player, Boolean> debugees = new HashMap<Player, Boolean>();
     public static final Logger log = Logger.getLogger("Minecraft");
+    public static PermissionHandler Permissions = null;
+    public PluginDescriptionFile pdfFile = this.getDescription();
+    
+    public static class QuickPortPlayerModeManager {
+    	private enum Mode { SELF, TUNNEL, SELECT, PLAYER };
+        private HashMap<String, Mode> playerModeTable = new HashMap();
+        // TODO: Implement list of player modes to kep track of who is doing what
+    }
+    
     
     public QuickPort(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File folder, File plugin, ClassLoader cLoader) {
         super(pluginLoader, instance, desc, folder, plugin, cLoader);
@@ -38,14 +50,28 @@ public class QuickPort extends JavaPlugin {
         // Register our events
         PluginManager pm = getServer().getPluginManager();
         
-        pm.registerEvent(Event.Type.PLAYER_ANIMATION, playerListener, Event.Priority.Highest, this);
+        pm.registerEvent(Event.Type.PLAYER_ANIMATION, playerListener, Event.Priority.Lowest, this);
+        
+        // TODO: Configuration file code
+        
+        // Load Permissions
+        Plugin test = this.getServer().getPluginManager().getPlugin("Permissions");
+
+        if(this.Permissions == null) {
+        	if(test != null) {
+        		Permissions = ((Permissions)test).getHandler();
+        		log.info("["+pdfFile.getName()+"] Permission system detected and applied.");
+        	} else {
+        		log.severe("["+pdfFile.getName()+"] DISABLED: Permission system not detected!");
+        		this.getServer().getPluginManager().disablePlugin(this);
+        	}
+        }
 
         // EXAMPLE: Custom code, here we just output some info so we can check all is well
-        PluginDescriptionFile pdfFile = this.getDescription();
+        
        log.info( "[" + pdfFile.getName() + "]" + " version " + pdfFile.getVersion() + " is enabled!" );
-       log.warning("[" + pdfFile.getName() + "] " +"This is a quick & dirty port of the hMod QuickPort by chrisinajar. As such,");
-       log.warning("[" + pdfFile.getName() + "] " +"it only has normal mode, ANYONE with a compass can use it, and");
-       log.warning("[" + pdfFile.getName() + "] " +"it's probably not stable. More features will be ported soon.");
+       log.warning("[" + pdfFile.getName() + "] " +"THIS IS ALPHA-VERSION SOFTWARE. There is a known conflict");
+       log.warning("[" + pdfFile.getName() + "] " +"with WorldEdit, which has implemented compass right-clicks.");
        log.warning("[" + pdfFile.getName() + "] " +"YOU HAVE BEEN WARNED! No complaining in the forums ;-)");
     }
     public void onDisable() {
